@@ -9,7 +9,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 
 DEBUG = os.environ.get("FLASK_DEBUG", False)
 
-logger_name = 'app'
+logger_name = 'flaskr'
 
 console = Console(width=120)
 
@@ -59,11 +59,6 @@ dict_config = {
             "handlers": ["console", "log_to_detail_file"],
             "level": "INFO",
             "propagate": False,
-        },
-        "log": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
+        }
     },
 }
