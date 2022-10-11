@@ -1,11 +1,7 @@
 import os
 from celery import Celery
-from logging import getLogger
 
-from app import app
-from logger import logger_name
-
-logger = getLogger(logger_name)
+from flaskr.app import app
 
 # celery
 if os.getenv('REDIS_PASSWORD'):

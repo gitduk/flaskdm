@@ -3,7 +3,7 @@ from werkzeug.local import LocalProxy
 from datetime import datetime
 from logging import getLogger
 
-from logger import logger_name
+from flaskr.logger import logger_name
 
 logger = getLogger(logger_name)
 

@@ -1,33 +1,43 @@
 import os
-from flask import Flask
+from logging import getLogger
 from logging.config import dictConfig
+from dotenv import load_dotenv
+from flask import Flask
 
-from logger import dict_config
+from flaskr.config import CONFIGS
+from flaskr.logger import dict_config, logger_name
+
+# config logger
+dictConfig(dict_config)
+logger = getLogger(logger_name)
 
 
-def create_app(test_config=None):
-    # config logger
-    dictConfig(dict_config)
+def create_app():
+    # load dotenv
+    flask_dotenv_path = os.path.join(os.path.abspath("."), ".env.flask")
+    load_dotenv(flask_dotenv_path)
+    mail_dotenv_path = os.path.join(os.path.abspath("."), ".env.mail")
+    load_dotenv(mail_dotenv_path)
 
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY='dev',
-        JSON_AS_ASCII=False,
-        DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
-    )
 
-    if test_config is None:
-        # load the config, if it exists, when not testing
-        app.config.from_pyfile(os.path.abspath("flaskr/config.py"), silent=False)
-    else:
-        # load the test config if passed in
-        app.config.from_mapping(test_config)
+    # load configuration
+    config_name = os.getenv('FLASK_CONFIGURATION', 'default')
+    app.config.from_object(CONFIGS[config_name])
 
-    # ensure the instance folder exists
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
+    # blueprint
+    from flaskr.views.tasker import tasker
+
+    app.register_blueprint(tasker)
+
+    @app.route('/config')
+    def show_config():
+        conf = dict(app.config)
+        for key, value in conf.items():
+            if isinstance(value, (str, tuple, list, bool)): continue
+            conf[key] = str(value)
+
+        return conf
 
     return app

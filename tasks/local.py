@@ -1,6 +1,7 @@
 import os
 
-from tasks.celery import celery, logger
+from flaskr import logger
+from tasks.celery import celery
 
 
 @celery.task

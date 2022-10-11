@@ -1,13 +1,10 @@
-from flask import render_template, request
-from flask import Blueprint
-from logging import getLogger
+from flask import render_template, request, Blueprint
 
-from logger import logger_name
+from flaskr import logger
 from flaskr.message import Message
 from flaskr.utils import get_task, is_drop
 
 tasker = Blueprint("tasker", __name__, url_prefix="/tasker")
-logger = getLogger(logger_name)
 
 
 @tasker.route("/api", methods=["GET", "POST"])
@@ -29,13 +26,13 @@ def api():
         except Exception as e:
             logger.error(f"Unexpected Error: {e}")
         else:
-            logger.info(f"Task: {action_name} [{result}] send")
+            logger.info(f"[{result}] '{action_name}' send")
             status = result.get() or ""
             if status == "ok":
-                msg = f"Stat: {action_name} [{result}] {status}"
+                msg = f"[{result}] '{action_name}' {status}"
                 logger.info(msg)
             else:
-                msg = f"Stat: {action_name} [{result}] not ok\n{status}"
+                msg = f"[{result}] '{action_name}' not ok\n{status}"
                 logger.warning(msg)
 
     return render_template("base.html")

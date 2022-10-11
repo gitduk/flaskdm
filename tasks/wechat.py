@@ -1,7 +1,8 @@
 import json
 import requests
 
-from tasks.celery import celery, logger
+from flaskr import logger
+from tasks.celery import celery
 
 
 @celery.task
@@ -22,7 +23,7 @@ def send(**kwargs):
     else:
         # 转发到企业微信
         url = f"https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={token}"
-        content = f"app: {app}\ntitle:{title}\ncontent:{content}"
+        content = f"{content}\n\n[{app}] {title}"
         request_body = {
             "touser": "@all",
             "msgtype": "text",

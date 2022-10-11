@@ -1,7 +1,7 @@
 import os
 from flask_mail import Message
 
-from app import mail, app
+from flaskr.app import mail, app
 from tasks.celery import celery
 
 
