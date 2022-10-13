@@ -16,11 +16,12 @@ def update_blacks(func):
 
 
 @update_blacks
-def is_drop(app, title):
+def is_drop(app, title, content):
     black_app = os.getenv("BLACK_APP", [])
     black_title = os.getenv("BLACK_TITLE", [])
+    black_content = os.getenv("BLACK_CONTENT", [])
 
-    if (app and app in black_app) or (title and title in black_title):
+    if (app and app in black_app) or (title and title in black_title) or (content and content in black_content):
         return True
     else:
         return False
