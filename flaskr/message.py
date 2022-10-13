@@ -1,11 +1,5 @@
 import json
 from werkzeug.local import LocalProxy
-from datetime import datetime
-from logging import getLogger
-
-from flaskr.logger import logger_name
-
-logger = getLogger(logger_name)
 
 
 class Message(object):
@@ -13,9 +7,8 @@ class Message(object):
         if isinstance(request, LocalProxy):
             kwargs.update(self._get_data(request))
 
-        self.app = kwargs.get("app")
-        self.time = kwargs.get("time")
-        self.action = kwargs.get("action")
+        self.action = kwargs.get("action", "notify")
+        self.kwargs = kwargs.get("kwargs", {})
 
     @staticmethod
     def _get_data(request):
@@ -27,12 +20,8 @@ class Message(object):
                 data = request.form
             else:
                 data = {
-                    "app": "flaskr",
-                    "time": str(datetime.now()),
-                    "action": {
-                        "name": "notify",
-                        "kwargs": {}
-                    }
+                    "action": "notify",
+                    "kwargs": {}
                 }
         else:
             data = json.loads(request.data.decode("utf-8"))
@@ -40,20 +29,14 @@ class Message(object):
         return data
 
     def json(self):
-        # 处理空值
         data = self.__dict__
-        for k, v in data.items():
-            if not isinstance(v, str): continue
-            if not v or v.startswith("%"): data[k] = ""
 
-        action = data.get("action")
-        if not action:
-            logger.warning(f"invalid action: {action}")
-        else:
-            for k, v in action.items():
-                if not isinstance(v, str): continue
-                if not v or v.startswith("%"): action[k] = ""
-            data["action"] = action
+        # 处理空值
+        kwargs = data.get("kwargs")
+        for k, v in kwargs.items():
+            if isinstance(v, str) and v.startswith("%"):
+                kwargs[k] = ""
+        data["kwargs"] = kwargs
 
         return data
 

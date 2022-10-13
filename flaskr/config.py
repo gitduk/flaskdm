@@ -1,6 +1,3 @@
-import os
-
-
 class Config:
     """
     Flask configuration
@@ -16,27 +13,13 @@ class FlaskMongoConfig:
     MONGO_URI = "mongodb://localhost:27017/flaskr"
 
 
-class FlaskMailConfig:
-    """
-    Flask-Mail configuration
-    """
-    MAIL_DEBUG = False
-    MAIL_SUPPRESS_SEND = False
-    MAIL_PORT = 465
-    MAIL_USE_SSL = True
-    MAIL_USE_TLS = False
-    MAIL_SERVER = os.getenv("MAIL_SERVER")
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
-
-
-class ProductionConfig(Config, FlaskMongoConfig, FlaskMailConfig):
+class ProductionConfig(Config, FlaskMongoConfig):
     """
     Custom configuration
     """
 
 
-class DevelopmentConfig(Config, FlaskMongoConfig, FlaskMailConfig):
+class DevelopmentConfig(Config, FlaskMongoConfig):
     """
     Custom configuration
     """

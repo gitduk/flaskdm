@@ -7,10 +7,6 @@ LOG_DIR = BASE_DIR / "logs"
 
 os.makedirs(LOG_DIR, exist_ok=True)
 
-DEBUG = os.environ.get("FLASK_DEBUG", False)
-
-logger_name = 'flaskr'
-
 console = Console(width=120)
 
 dict_config = {
@@ -39,7 +35,7 @@ dict_config = {
             "formatter": "rich",
             "console": console,
         },
-        "log_to_detail_file": {
+        "flask_log_file": {
             "class": "logging.handlers.RotatingFileHandler",
             "level": "INFO",
             "formatter": "verbose",
@@ -49,14 +45,29 @@ dict_config = {
             "backupCount": 20,
             "encoding": "utf8",
         },
+        "celery_log_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "INFO",
+            "formatter": "verbose",
+            "filename": LOG_DIR / "celery.log",
+            "mode": "w+",
+            "maxBytes": 1024 * 1024 * 5,  # 5 MB
+            "backupCount": 20,
+            "encoding": "utf8",
+        },
     },
     "root": {
         "handlers": ["console"],
-        "level": "INFO" if DEBUG else "WARNING",
+        "level": "INFO",
     },
     "loggers": {
-        logger_name: {
-            "handlers": ["console", "log_to_detail_file"],
+        "flask": {
+            "handlers": ["console", "flask_log_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "celery": {
+            "handlers": ["console", "celery_log_file"],
             "level": "INFO",
             "propagate": False,
         }

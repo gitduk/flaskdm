@@ -4,20 +4,18 @@ from logging.config import dictConfig
 from dotenv import load_dotenv
 from flask import Flask
 
+from logger import dict_config
 from flaskr.config import CONFIGS
-from flaskr.logger import dict_config, logger_name
 
 # config logger
 dictConfig(dict_config)
-logger = getLogger(logger_name)
+logger = getLogger("flask")
 
 
 def create_app():
     # load dotenv
-    flask_dotenv_path = os.path.join(os.path.abspath("."), ".env.flask")
+    flask_dotenv_path = os.path.join(os.path.abspath("."), ".env")
     load_dotenv(flask_dotenv_path)
-    mail_dotenv_path = os.path.join(os.path.abspath("."), ".env.mail")
-    load_dotenv(mail_dotenv_path)
 
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)

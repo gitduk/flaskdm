@@ -1,25 +1,24 @@
 import json
 import requests
 
-from flaskr import logger
 from tasks.celery import celery
 
 
 @celery.task
-def send(**kwargs):
-    _id = kwargs.get("id")
-    secret = kwargs.get("secret")
-    agent_id = kwargs.get("agent_id")
-    app = kwargs.get("app")
-    title = kwargs.get("title")
-    content = kwargs.get("content")
+def send(_id, secret, agent_id, app="", title="", content=""):
+    if not any([app, title, content]):
+        return "data is null"
 
     try:
         get_token_url = f"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={_id}&corpsecret={secret}"
         resp = requests.get(get_token_url)
+
+        if resp.json().get("errcode") != 0:
+            return "get token failed: {}".format(resp.json().get("errmsg"))
+
         token = resp.json().get("access_token")
-    except:
-        logger.warning("get token failed")
+    except Exception as e:
+        return "get token failed: {}".format(e.__str__())
     else:
         # 转发到企业微信
         url = f"https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={token}"
@@ -35,7 +34,6 @@ def send(**kwargs):
         resp = requests.post(url, data=json.dumps(request_body))
 
         if resp.json().get("errcode") != 0:
-            errmsg = resp.json().get("errmsg")
-            logger.warning(f"发送失败: {errmsg}")
+            return "send data error: {}".format(resp.json().get("errmsg"))
 
-    return "ok"
+        return "ok"

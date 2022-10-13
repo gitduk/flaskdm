@@ -1,24 +1,26 @@
 import os
-from flask_mail import Message
+import smtplib
+from email.mime.text import MIMEText
 
-from flaskr.app import mail, app
 from tasks.celery import celery
 
 
 @celery.task
-def send(mail_to, subject="", content="", html=""):
+def send(mail_to, subject="", content=""):
+    server = os.getenv("MAIL_SERVER")
+    sender = os.getenv("MAIL_SENDER")
+    password = os.getenv("MAIL_PASSWORD")
     try:
-        msg = Message(
-            subject=subject,
-            sender=os.getenv("MAIL_USERNAME"),
-            recipients=[mail_to]
-        )
-        msg.body = content
-        msg.html = html
+        msg = MIMEText(content)
+        msg['Subject'] = subject
+        msg['From'] = sender
+        msg['To'] = mail_to
 
-        with app.app_context():
-            mail.send(msg)
+        smtp = smtplib.SMTP_SSL(server)
+        smtp.login(sender, password)
+        smtp.sendmail(sender, mail_to, msg.as_string())
+        smtp.quit()
     except Exception as e:
         return e.__str__()
-
-    return "ok"
+    else:
+        return "ok"

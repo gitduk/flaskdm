@@ -1,30 +1,23 @@
 import os
+import logging
 from celery import Celery
+from celery.signals import setup_logging
+from logging.config import dictConfig
 
+from logger import dict_config
 from flaskr.app import app
+from tasks.config import CONFIGS
 
-# celery
-if os.getenv('REDIS_PASSWORD'):
-    CELERY_BROKER_URL = 'redis://:{}@localhost:6379/1'.format(os.getenv('REDIS_PASSWORD'))
-    CELERY_RESULT_BACKEND = 'redis://:{}@localhost:6379/1'.format(os.getenv('REDIS_PASSWORD'))
-else:
-    CELERY_BROKER_URL = 'redis://localhost:6379/1'
-    CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
+# create and config celery
+celery = Celery(app.import_name)
+config_name = os.getenv("CELERY_CONFIG", "default")
+celery.config_from_object(CONFIGS[config_name])
 
-CELERYD_CONCURRENCY = 10  # 并发worker数量
-CELERY_TIMEZONE = 'Asia/Shanghai'  # 时区
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERYD_ENABLE_UTC = True
-CELERYD_FORCE_EXECV = True  # 防止死锁,应确保为True
-CELERYD_PREFETCH_MULTIPLIER = 1  # 禁用任务预取
-CELERYD_MAX_TASKS_PER_CHILD = 100  # worker执行100个任务自动销毁，防止内存泄露
-CELERYD_TASK_SOFT_TIME_LIMIT = 6000  # 单个任务的运行时间不超过此值(秒)，否则会抛出(SoftTimeLimitExceeded)异常停止任务。
-CELERY_DISABLE_RATE_LIMITS = True  # 即使任务设置了明确的速率限制，也禁用所有速率限制。
 
-celery = Celery(
-    app.import_name,
-    broker=CELERY_BROKER_URL,
-    backend=CELERY_RESULT_BACKEND,
-)
+@setup_logging.connect
+def logger_setup_handler(*args, **kwargs):
+    dictConfig(dict_config)
+
+
+# celery logging configuration
+logger = logging.getLogger("celery")
