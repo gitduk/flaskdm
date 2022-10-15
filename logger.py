@@ -34,6 +34,7 @@ dict_config = {
             "class": "rich.logging.RichHandler",
             "formatter": "rich",
             "console": console,
+            "markup": True
         },
         "flask_log_file": {
             "class": "logging.handlers.RotatingFileHandler",
