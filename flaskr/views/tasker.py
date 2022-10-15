@@ -7,6 +7,10 @@ from flaskr.utils import get_task
 tasker = Blueprint("tasker", __name__, url_prefix="/tasker")
 
 
+@tasker.route("/ok", methods=["GET", "POST"])
+def ok():
+    return "ok"
+
 @tasker.route("/api", methods=["GET", "POST"])
 def api():
     if request.method == "GET": return "Get Method Is Not Allowed"
@@ -38,3 +42,4 @@ def api():
         return ""
     else:
         return resp
+
