@@ -2,16 +2,24 @@ import os
 import clipboard
 import base64
 
-from tasks.celery import celery, logger
+from logging import getLogger
+
+from tasks.celery import celery
 from tasks.utils import is_drop
+
+logger = getLogger(__name__)
 
 
 @celery.task
 def notify(app, title, content=""):
-    # drop notify
-    if is_drop(app, title, content): return f"drop {app}:{title}:{content}"
-
     if any([app, title, content]):
+        filter_list = is_drop(app, title, content)
+        if filter_list: return {
+            "filter": filter_list,
+            "app": app,
+            "title": title,
+            "content": content,
+        }
         os.system(f"notify-send '{app} - {title}' '{content}'")
     else:
         return "params is null"

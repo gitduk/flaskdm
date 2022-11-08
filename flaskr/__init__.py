@@ -1,15 +1,14 @@
 import os
 from logging import getLogger
-from logging.config import dictConfig
 from dotenv import load_dotenv
 from flask import Flask
 
-from logger import dict_config
+from logger import init_logger
 from flaskr.config import CONFIGS
 
 # config logger
-dictConfig(dict_config)
-logger = getLogger("flask")
+init_logger()
+logger = getLogger(__name__)
 
 
 def create_app():
@@ -26,8 +25,10 @@ def create_app():
 
     # blueprint
     from flaskr.views.tasker import tasker
+    from flaskr.views.scrapyd import scrapyd
 
     app.register_blueprint(tasker)
+    app.register_blueprint(scrapyd)
 
     @app.route('/config')
     def show_config():

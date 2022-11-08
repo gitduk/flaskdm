@@ -1,76 +1,43 @@
 import os
+import sys
+import logging
+
 from pathlib import Path
-from rich.console import Console
+from logging.handlers import RotatingFileHandler
+
+from utils.log import ColorizedFormatter, DateFormat, Format
 
 BASE_DIR = Path(__file__).resolve().parent
 LOG_DIR = BASE_DIR / "logs"
 
 os.makedirs(LOG_DIR, exist_ok=True)
 
-console = Console(width=120)
 
-dict_config = {
-    "version": 1,
-    "formatters": {
-        "simple": {
-            "format": "{asctime} {levelname} {message}",
-            "style": "{"
-        },
-        "verbose": {
-            "format": "{asctime} {filename}:{lineno}:{funcName} [{levelname}] {message}",
-            "style": "{",
-            "datefmt": "%Y-%m-%d %H:%M:%S"
-        },
-        "rich": {
-            "format": "{message}",
-            "style": "{",
-            "datefmt": "[%X]"
-        },
-    },
-    "handlers": {
-        "console": {
-            "level": os.environ.get("LOG_LEVEL", "DEBUG"),
-            # "class": "logging.StreamHandler",
-            "class": "rich.logging.RichHandler",
-            "formatter": "rich",
-            "console": console,
-            "markup": True
-        },
-        "flask_log_file": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "level": "INFO",
-            "formatter": "verbose",
-            "filename": LOG_DIR / "tasker.log",
-            "mode": "w+",
-            "maxBytes": 1024 * 1024 * 5,  # 5 MB
-            "backupCount": 20,
-            "encoding": "utf8",
-        },
-        "celery_log_file": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "level": "INFO",
-            "formatter": "verbose",
-            "filename": LOG_DIR / "celery.log",
-            "mode": "w+",
-            "maxBytes": 1024 * 1024 * 5,  # 5 MB
-            "backupCount": 20,
-            "encoding": "utf8",
-        },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "INFO",
-    },
-    "loggers": {
-        "flask": {
-            "handlers": ["console", "flask_log_file"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "celery": {
-            "handlers": ["console", "celery_log_file"],
-            "level": "INFO",
-            "propagate": False,
-        }
-    },
-}
+def init_logger():
+    stream_handler = logging.StreamHandler(stream=sys.stdout)
+    stream_formatter = ColorizedFormatter(fmt=Format.SIMPLE, datefmt=DateFormat.SIMPLE)
+    stream_handler.setFormatter(stream_formatter)
+
+    flask_file_handler = RotatingFileHandler(filename=LOG_DIR / "flask.log", maxBytes=5 * 1024 * 1024, backupCount=5)
+    celery_file_handler = RotatingFileHandler(filename=LOG_DIR / "celery.log", maxBytes=5 * 1024 * 1024, backupCount=5)
+    scrapy_file_handler = RotatingFileHandler(filename=LOG_DIR / "scrapy.log", maxBytes=5 * 1024 * 1024, backupCount=5)
+
+    # root logger
+    logging.basicConfig(level=logging.NOTSET, format=Format.SIMPLE, datefmt=DateFormat.SIMPLE,
+                        handlers=[stream_handler])
+
+    flask_logger = logging.getLogger(__name__)
+    flask_logger.addHandler(stream_handler)
+    flask_logger.addHandler(flask_file_handler)
+    flask_logger.propagate = False
+
+    celery_logger = logging.getLogger(__name__)
+    celery_logger.setLevel(logging.INFO)
+    celery_logger.addHandler(stream_handler)
+    celery_logger.addHandler(celery_file_handler)
+    celery_logger.propagate = False
+
+    scrapy_logger = logging.getLogger(__name__)
+    scrapy_logger.addHandler(stream_handler)
+    scrapy_logger.addHandler(scrapy_file_handler)
+    scrapy_logger.propagate = False

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>ScrapyPane</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='scrapyd/style.css') }}">
+
+{% endblock %}
+
+{% block body %}
+
+<ul class="projects">
+    <li><a class="default" href="{{ url_for('scrapyd.projects',project='default', page=1) }}">HOME</a></li>
+    {% for proj in project_list %}
+    {% if proj != "default" %}
+    <li><a href="#news">{{ proj }}</a></li>
+    {% endif %}
+    {% endfor %}
+</ul>
+
+<h2>Spiders</h2>
+
+<ul class="spiders">
+    {% for sp in spider_list %}
+    <li><a href="#news">{{ sp }}</a></li>
+    {% endfor %}
+</ul>
+
+<br>
+
+<div class="pagination">
+    {% if page-1 > 0 %}
+    <a href="{{ url_for('scrapyd.projects',project='default', page=page-1) }}">&laquo;</a>
+    {% else %}
+    <a href="#">&laquo;</a>
+    {% endif %}
+
+
+    {% for i in range(1, count_page + 1) %}
+
+    {% if i == page %}
+    <a href="#" class="active">{{ i }}</a>
+    {% else %}
+    <a id="{{ i }}" class="page" href="{{ url_for('scrapyd.projects',project='default', page=i) }}">{{ i }}</a>
+    {% endif %}
+
+    {% endfor %}
+
+
+    {% if page < count_page %}
+    <a href="{{ url_for('scrapyd.projects',project='default', page=page+1) }}">&raquo;</a>
+    {% else %}
+    <a href="#">&raquo;</a>
+    {% endif %}
+
+</div>
+<script type="text/javascript">
+    console.log('scrapyd')
+    console.log($)
+</script>
+
+{% endblock %}
+

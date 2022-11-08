@@ -1,7 +1,9 @@
 import json
 
+from logging import getLogger
 from werkzeug.local import LocalProxy
-from flaskr import logger
+
+logger = getLogger(__name__)
 
 
 class Message(object):

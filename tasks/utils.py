@@ -1,27 +1,18 @@
-import os
-import functools
-from dotenv import dotenv_values
+import re
+
+from tasks.celery import celery
 
 
-def update_blacks(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        dotenv_path = os.path.join(os.path.abspath("."), ".env")
-        env_values = dotenv_values(dotenv_path)
-        os.environ.setdefault("BLACK_APP", env_values.get("BLACK_APP"))
-        os.environ.setdefault("BLACK_TITLE", env_values.get("BLACK_TITLE"))
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-@update_blacks
 def is_drop(app, title, content):
-    black_app = os.getenv("BLACK_APP", [])
-    black_title = os.getenv("BLACK_TITLE", [])
-    black_content = os.getenv("BLACK_CONTENT", [])
+    black_app = celery.conf.get("BLACK_APP", [])
+    black_title = celery.conf.get("BLACK_TITLE", [])
+    black_content = celery.conf.get("BLACK_CONTENT", [])
 
-    if (app and app in black_app) or (title and title in black_title) or (content and content in black_content):
-        return True
-    else:
-        return False
+    app_filter = [ba for ba in black_app if re.search(ba, app)] if app else []
+    title_filter = [bt for bt in black_title if re.search(bt, title)] if title else []
+    content_filter = [bc for bc in black_content if re.search(bc, content)] if content else []
+    filter_list = [*app_filter, *title_filter, *content_filter]
+
+    if not filter_list: return False
+
+    return filter_list

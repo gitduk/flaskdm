@@ -1,10 +1,11 @@
+from logging import getLogger
 from flask import request, Blueprint
 
-from flaskr import logger
 from flaskr.message import Message
 from flaskr.utils import get_task
 
 tasker = Blueprint("tasker", __name__, url_prefix="/tasker")
+logger = getLogger(__name__)
 
 
 @tasker.route("/ok", methods=["GET", "POST"])
@@ -28,12 +29,7 @@ def api():
         logger.exception(e)
         return ""
     else:
-        logger.info(
-            '[ID [bold green]{}[/]] [bold green]"[/][bold medium_purple3]TASK[/] [green].{}[/][bold green]"[/] send'.format(
-                result, action_name
-            ),
-            extra={"markup": True, "highlighter": None},
-        )
+        logger.info('[ID %s] "TASK .%s" send', result, action_name)
 
     try:
         resp = result.get() or ""

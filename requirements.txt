@@ -24,6 +24,10 @@ pip                ==22.2.2
 prompt-toolkit     ==3.0.31
 Pygments           ==2.13.0
 pymongo            ==4.2.0
+<<<<<<< HEAD
+=======
+pymysql            ==1.0.2
+>>>>>>> add utils module
 pyparsing          ==3.0.9
 pyperclip          ==1.8.2
 python-dotenv      ==0.21.0
